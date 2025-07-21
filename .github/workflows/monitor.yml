@@ -1,4 +1,4 @@
-name: Monitor VMware Advisories
+name: Monitor VMware Security Advisories
 
 on:
   schedule:

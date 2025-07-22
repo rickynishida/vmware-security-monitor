@@ -81,13 +81,14 @@ O script está preparado para rodar periodicamente via **GitHub Actions**, com d
 
 Você pode testar o script localmente com:
 
----
-
-## 📁 Estrutura de arquivos
-
 ```bash
 export SIMULATE=true
 python main.py
+```
+
+---
+
+## 📁 Estrutura de arquivos
 
 vmware-security-monitor/
 ├── main.py               # Código principal
@@ -95,6 +96,6 @@ vmware-security-monitor/
 ├── .github/workflows/
 │   └── notify.yml        # Agendamento via GitHub Actions
 ├── README.md             # Este arquivo
-```
+
 
 

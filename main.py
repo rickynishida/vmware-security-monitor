@@ -18,13 +18,13 @@ ALLOWED_PRODUCTS = {
     "VMware Aria Operations for logs", "VMware Aria Operations for Networks",
     "VMware Workspace ONE Access (Access)", "VMware Identity Manager (vIDM)"
 }
-ALLOWED_YEARS = {"2025"}  # você pode adaptar isso para incluir outras datas
+ALLOWED_YEARS = {"2025"}
 
 COLOR_CODES = {
-    "CRITICAL": 0xFF0000,  # Vermelho
-    "HIGH": 0xFFA500,      # Laranja
-    "MEDIUM": 0xFFFF00,    # Amarelo
-    "LOW": 0x00FF00        # Verde
+    "CRITICAL": 0xFF0000,
+    "HIGH": 0xFF8000,
+    "MEDIUM": 0xFEFF00,
+    "LOW": 0x00FF00
 }
 
 def load_cache():
@@ -50,8 +50,9 @@ def get_advisories():
         return []
 
 def send_to_discord(advisory):
-    title = advisory.get("title", "Sem título")
+    title_full = advisory.get("title", "Sem título")
     advisory_id = advisory.get("documentId", "")
+    title_id = title_full.split(":")[0].strip()
     severity = advisory.get("severity", "UNKNOWN").upper()
     products = advisory.get("supportProducts", "")
     link = advisory.get("notificationUrl") or "https://support.broadcom.com"
@@ -61,28 +62,25 @@ def send_to_discord(advisory):
     cvss_range = advisory.get("cvssRange", "N/A")
     updated_on = advisory.get("updated", "")[:10]
 
-    product_lines = "\n".join(f"- {p.strip()}" for p in products.split(","))
+    product_lines = "\n".join(f"- {p.strip()}" for p in products.split(",") if p.strip())
 
-    message = (
-        f"**[{advisory_id}](<{link}>)**\n"
-        f"{title}\n\n"
-        f"**Advisory ID:** {advisory_id}\n"
-        f"**Advisory Severity:** {severity}\n"
-        f"**CVSS Base Score:** {cvss_range}\n"
-        f"**Issue date:** {formatted_date}\n"
-        f"**Updated on:** {updated_on} (Initial Advisory)\n"
-        f"**CVE(s):** {cves}\n\n"
-        f"**Impacted Products**\n{product_lines}"
-    )
-
-    payload = {
-        "embeds": [
-            {
-                "description": message,
-                "color": COLOR_CODES.get(severity, 0x808080)  # cinza default
-            }
+    embed = {
+        "title": f"{title_id}",
+        "url": link,
+        "description": f"{title_full}",
+        "color": COLOR_CODES.get(severity, 0x808080),
+        "fields": [
+            {"name": "Advisory ID", "value": title_id, "inline": True},
+            {"name": "Advisory Severity", "value": severity, "inline": True},
+            {"name": "CVSS Base Score", "value": cvss_range, "inline": True},
+            {"name": "Issue date", "value": formatted_date, "inline": True},
+            {"name": "Updated on", "value": f"{updated_on} (Initial Advisory)", "inline": True},
+            {"name": "CVE(s)", "value": cves or "N/A", "inline": True},
+            {"name": "Impacted Products", "value": product_lines or "N/A", "inline": False}
         ]
     }
+
+    payload = {"embeds": [embed]}
 
     if SIMULATION_MODE or not WEBHOOK_URL:
         print("[SIMULAÇÃO] Payload para Discord:", json.dumps(payload, indent=2))
@@ -96,15 +94,12 @@ def matches_filters(advisory):
     products = advisory.get("supportProducts", "")
     published = advisory.get("published", "")
 
-    # Verifica severidade
     if severity not in ALLOWED_SEVERITIES:
         return False
 
-    # Verifica produtos
     if not any(prod.lower() in products.lower() for prod in ALLOWED_PRODUCTS):
         return False
 
-    # Verifica ano de publicação
     try:
         pub_date = datetime.strptime(published, "%d %B %Y")
         if str(pub_date.year) not in ALLOWED_YEARS:

@@ -56,6 +56,7 @@ def send_to_discord(advisory):
     title_id = title_full.split(":")[0].strip()
     severity = advisory.get("severity", "UNKNOWN").upper()
     products = advisory.get("supportProducts", "")
+    workaround = advisory.get("workAround", "None") or "None"
     link = advisory.get("notificationUrl") or "https://support.broadcom.com"
     date_published = advisory.get("published", "")
     formatted_date = datetime.strptime(date_published, "%d %B %Y").strftime("%d/%m/%Y") if date_published else ""
@@ -64,6 +65,10 @@ def send_to_discord(advisory):
     updated_on = advisory.get("updated", "")[:10]
 
     product_lines = "\n".join([f"• {p.strip()}" for p in products.split(",") if p.strip()])
+
+    # Verifica se ultrapassa limite de caracteres do campo Discord (1024)
+    if len(product_lines) > 1024:
+        product_lines = product_lines[:1020] + "..."
 
     embed = {
         "title": f"{title_id}",
@@ -76,7 +81,8 @@ def send_to_discord(advisory):
             {"name": "CVSS Base Score", "value": cvss_range, "inline": True},
             {"name": "Issue date", "value": formatted_date, "inline": True},
             {"name": "Updated on", "value": f"{updated_on} (Initial Advisory)", "inline": True},
-            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}", "inline": False},
+            {"name": "Workaround", "value": workaround, "inline": True},
+            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n", "inline": False},
             {"name": "Impacted Products", "value": product_lines or "N/A", "inline": False}
         ]
     }

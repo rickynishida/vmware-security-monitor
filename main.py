@@ -18,6 +18,7 @@ ALLOWED_PRODUCTS = {
     "VMware Aria Operations for logs", "VMware Aria Operations for Networks",
     "VMware Workspace ONE Access (Access)", "VMware Identity Manager (vIDM)"
 }
+# ALLOWED_YEARS = {"2025"}  # Comentado conforme solicitado
 DAYS_BACK = 10  # Filtro por data: últimos 10 dias
 
 COLOR_CODES = {
@@ -63,12 +64,12 @@ def send_to_discord(advisory):
     cvss_range = advisory.get("cvssRange", "N/A")
     updated_on = advisory.get("updated", "")[:10]
 
-    product_lines = [p.strip() for p in products.split(",") if p.strip()]
+    product_line = ", ".join([p.strip() for p in products.split(",") if p.strip()])
 
-    embed_main = {
+    embed = {
         "title": f"{title_id}",
         "url": link,
-        "description": f"{title_full}\n\n",
+        "description": f"{title_full}\n\n\n",
         "color": COLOR_CODES.get(severity, 0x808080),
         "fields": [
             {"name": "Advisory ID", "value": title_id, "inline": True},
@@ -77,22 +78,12 @@ def send_to_discord(advisory):
             {"name": "Issue date", "value": formatted_date, "inline": True},
             {"name": "Updated on", "value": f"{updated_on} (Initial Advisory)", "inline": True},
             {"name": "Workaround", "value": workaround, "inline": True},
-            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n", "inline": False}
+            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n", "inline": False},
+            {"name": "Impacted Products", "value": product_line or "N/A", "inline": False}
         ]
     }
 
-    embeds = [embed_main]
-
-    for i in range(0, len(product_lines), 5):
-        chunk = product_lines[i:i + 5]
-        embed = {
-            "title": "Impacted Products" if i == 0 else "\u200b",
-            "description": "\n".join(chunk),
-            "color": COLOR_CODES.get(severity, 0x808080)
-        }
-        embeds.append(embed)
-
-    payload = {"embeds": embeds}
+    payload = {"embeds": [embed]}
 
     if SIMULATION_MODE or not WEBHOOK_URL:
         print("[SIMULAÇÃO] Payload para Discord:", json.dumps(payload, indent=2))

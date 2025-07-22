@@ -24,6 +24,6 @@ jobs:
       - name: Run script
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          SIMULATE: "true"
+          SIMULATE: "false"
         run: python main.py
 

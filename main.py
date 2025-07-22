@@ -3,7 +3,7 @@ import json
 import os
 
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", None)
-SIMULATION_MODE = os.environ.get("SIMULATE", "true").lower() == "true"
+SIMULATION_MODE = os.environ.get("SIMULATE", "true").lower() == "false"
 CACHE_FILE = "advisory_cache.json"
 API_URL = "https://support.broadcom.com/web/ecx/security-advisory/-/securityadvisory/getSecurityAdvisoryList"
 

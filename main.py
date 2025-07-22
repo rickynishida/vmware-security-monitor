@@ -78,7 +78,7 @@ def send_to_discord(advisory):
             {"name": "Issue date", "value": formatted_date, "inline": True},
             {"name": "Updated on", "value": f"{updated_on} (Initial Advisory)", "inline": True},
             {"name": "Workaround", "value": workaround, "inline": True},
-            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n\n", "inline": False}
+            {"name": "u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n", "inline": False}
         ]
     }
 

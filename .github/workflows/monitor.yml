@@ -3,7 +3,10 @@ name: Monitor VMware Security Advisories
 on:
   schedule:
     - cron: "0 11 * * *"  # 08:00 BRT
+    - cron: "0 15 * * *"  # 12:00 BRT
     - cron: "0 21 * * *"  # 18:00 BRT
+
+
   workflow_dispatch:  # permite executar manualmente também
 
 jobs:

@@ -64,11 +64,7 @@ def send_to_discord(advisory):
     cvss_range = advisory.get("cvssRange", "N/A")
     updated_on = advisory.get("updated", "")[:10]
 
-    product_lines = "\n".join([f"• {p.strip()}" for p in products.split(",") if p.strip()])
-
-    # Verifica se ultrapassa limite de caracteres do campo Discord (1024)
-    if len(product_lines) > 1024:
-        product_lines = product_lines[:1020] + "..."
+    product_lines = [f"• {p.strip()}" for p in products.split(",") if p.strip()]
 
     embed = {
         "title": f"{title_id}",
@@ -82,10 +78,21 @@ def send_to_discord(advisory):
             {"name": "Issue date", "value": formatted_date, "inline": True},
             {"name": "Updated on", "value": f"{updated_on} (Initial Advisory)", "inline": True},
             {"name": "Workaround", "value": workaround, "inline": True},
-            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n\n", "inline": False},
-            {"name": "Impacted Products", "value": product_lines or "N/A", "inline": False}
+            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n\n", "inline": False}
         ]
     }
+
+    # Dividir produtos em múltiplos campos se necessário
+    max_len = 1024
+    current_chunk = ""
+    for p in product_lines:
+        if len(current_chunk) + len(p) + 1 < max_len:
+            current_chunk += f"{p}\n"
+        else:
+            embed["fields"].append({"name": "Impacted Products", "value": current_chunk.strip(), "inline": False})
+            current_chunk = f"{p}\n"
+    if current_chunk:
+        embed["fields"].append({"name": "Impacted Products", "value": current_chunk.strip(), "inline": False})
 
     payload = {"embeds": [embed]}
 

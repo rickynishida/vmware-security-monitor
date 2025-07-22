@@ -63,12 +63,12 @@ def send_to_discord(advisory):
     cvss_range = advisory.get("cvssRange", "N/A")
     updated_on = advisory.get("updated", "")[:10]
 
-    product_lines = "\n".join(f"- {p.strip()}" for p in products.split(",") if p.strip())
+    product_lines = "\n".join([f"• {p.strip()}" for p in products.split(",") if p.strip()])
 
     embed = {
         "title": f"{title_id}",
         "url": link,
-        "description": f"{title_full}\n\n",  # Salta uma linha antes dos campos
+        "description": f"{title_full}\n\n",
         "color": COLOR_CODES.get(severity, 0x808080),
         "fields": [
             {"name": "Advisory ID", "value": title_id, "inline": True},
@@ -76,7 +76,7 @@ def send_to_discord(advisory):
             {"name": "CVSS Base Score", "value": cvss_range, "inline": True},
             {"name": "Issue date", "value": formatted_date, "inline": True},
             {"name": "Updated on", "value": f"{updated_on} (Initial Advisory)", "inline": True},
-            {"name": "CVE(s)", "value": cves or "N/A", "inline": True},
+            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}", "inline": False},
             {"name": "Impacted Products", "value": product_lines or "N/A", "inline": False}
         ]
     }

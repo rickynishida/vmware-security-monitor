@@ -64,12 +64,12 @@ def send_to_discord(advisory):
     cvss_range = advisory.get("cvssRange", "N/A")
     updated_on = advisory.get("updated", "")[:10]
 
-    product_lines = [f"- {p.strip()}" for p in products.split(",") if p.strip()]
+    product_lines = [f"• {p.strip()}" for p in products.split(",") if p.strip()]
 
-    embed_main = {
+    embed = {
         "title": f"{title_id}",
         "url": link,
-        "description": f"{title_full}\n\n",
+        "description": f"{title_full}\n\n\n",
         "color": COLOR_CODES.get(severity, 0x808080),
         "fields": [
             {"name": "Advisory ID", "value": title_id, "inline": True},
@@ -82,15 +82,19 @@ def send_to_discord(advisory):
         ]
     }
 
-    embed_products = {
-        "title": "Impacted Products",
-        "color": COLOR_CODES.get(severity, 0x808080),
-        "fields": [
-            {"name": "Impacted Products", "value": "\n".join(product_lines) or "N/A", "inline": False}
-        ]
-    }
+    # Dividir produtos em múltiplos campos se necessário
+    max_len = 1024
+    current_chunk = ""
+    for p in product_lines:
+        if len(current_chunk) + len(p) + 1 < max_len:
+            current_chunk += f"{p}\n"
+        else:
+            embed["fields"].append({"name": "Impacted Products", "value": current_chunk.strip(), "inline": False})
+            current_chunk = f"{p}\n"
+    if current_chunk:
+        embed["fields"].append({"name": "Impacted Products", "value": current_chunk.strip(), "inline": False})
 
-    payload = {"embeds": [embed_main, embed_products]}
+    payload = {"embeds": [embed]}
 
     if SIMULATION_MODE or not WEBHOOK_URL:
         print("[SIMULAÇÃO] Payload para Discord:", json.dumps(payload, indent=2))

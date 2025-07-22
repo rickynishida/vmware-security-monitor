@@ -89,13 +89,13 @@ python main.py
 ---
 
 ## 📁 Estrutura de arquivos
-
+```bash
 vmware-security-monitor/
 ├── main.py               # Código principal
 ├── advisory_cache.json   # Cache local de advisories enviados
 ├── .github/workflows/
 │   └── notify.yml        # Agendamento via GitHub Actions
 ├── README.md             # Este arquivo
-
+```
 
 

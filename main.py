@@ -49,71 +49,16 @@ def get_advisories():
     except Exception as e:
         print("❌ Erro ao interpretar JSON:", e)
         return []
-"""
-def send_to_discord(advisory):
-    title_full = advisory.get("title", "Sem título")
-    advisory_id = advisory.get("documentId", "")
-    title_id = title_full.split(":")[0].strip()
-    severity = advisory.get("severity", "UNKNOWN").upper()
-    products = advisory.get("supportProducts", "")
-    workaround = advisory.get("workAround", "None") or "None"
-    link = advisory.get("notificationUrl") or "https://support.broadcom.com"
-    date_published = advisory.get("published", "")
-    formatted_date = datetime.strptime(date_published, "%d %B %Y").strftime("%d/%m/%Y") if date_published else ""
-    cves = advisory.get("affectedCve", "")
-    cvss_range = advisory.get("cvssRange", "N/A")
-    updated_on = advisory.get("updated", "")[:10]
-
-    product_lines = [f"• {p.strip()}" for p in products.split(",") if p.strip()]
-
-    embed = {
-        "title": f"{title_id}",
-        "url": link,
-        "description": f"{title_full}\n\n\n",
-        "color": COLOR_CODES.get(severity, 0x808080),
-        "fields": [
-            {"name": "Advisory ID", "value": title_id, "inline": True},
-            {"name": "Advisory Severity", "value": severity, "inline": True},
-            {"name": "CVSS Base Score", "value": cvss_range, "inline": True},
-            {"name": "Issue date", "value": formatted_date, "inline": True},
-            {"name": "Updated on", "value": f"{updated_on} (Initial Advisory)", "inline": True},
-            {"name": "Workaround", "value": workaround, "inline": True},
-            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n", "inline": False}
-        ]
-    }
-
-    # Dividir produtos em múltiplos campos se necessário
-    max_len = 1024
-    current_chunk = ""
-    for p in product_lines:
-        if len(current_chunk) + len(p) + 1 < max_len:
-            current_chunk += f"{p}\n"
-        else:
-            embed["fields"].append({"name": "Impacted Products", "value": current_chunk.strip(), "inline": False})
-            current_chunk = f"{p}\n"
-    if current_chunk:
-        embed["fields"].append({"name": "Impacted Products", "value": current_chunk.strip(), "inline": False})
-
-    payload = {"embeds": [embed]}
-
-    if SIMULATION_MODE or not WEBHOOK_URL:
-        print("[SIMULAÇÃO] Payload para Discord:", json.dumps(payload, indent=2))
-    else:
-        response = requests.post(WEBHOOK_URL, json=payload)
-        if response.status_code != 204:
-            print(f"❌ Erro ao enviar para Discord: {response.status_code} - {response.text}")
-"""
 
 def send_to_discord(advisory):
     title_full = advisory.get("title", "Sem título")
-    advisory_id = advisory.get("documentId", "")
     title_id = title_full.split(":")[0].strip()
     severity = advisory.get("severity", "UNKNOWN").upper()
     products = advisory.get("supportProducts", "")
     link = advisory.get("notificationUrl") or "https://support.broadcom.com"
 
-    # Produtos como lista
-    product_lines = [f"• {p.strip()}" for p in products.split(",") if p.strip()]
+    # Produtos um por linha, sem bullet
+    product_lines = [p.strip() for p in products.split(",") if p.strip()]
     product_text = "\n".join(product_lines) if product_lines else "N/A"
 
     embed = {
@@ -131,7 +76,6 @@ def send_to_discord(advisory):
         response = requests.post(WEBHOOK_URL, json=payload)
         if response.status_code != 204:
             print(f"❌ Erro ao enviar para Discord: {response.status_code} - {response.text}")
-
 
 def matches_filters(advisory):
     severity = advisory.get("severity", "").upper()

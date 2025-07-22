@@ -73,7 +73,7 @@ def send_to_discord(advisory):
     embed = {
         "title": f"{title_id}",
         "url": link,
-        "description": f"{title_full}\n\n",
+        "description": f"{title_full}\n\n\n",
         "color": COLOR_CODES.get(severity, 0x808080),
         "fields": [
             {"name": "Advisory ID", "value": title_id, "inline": True},
@@ -82,7 +82,7 @@ def send_to_discord(advisory):
             {"name": "Issue date", "value": formatted_date, "inline": True},
             {"name": "Updated on", "value": f"{updated_on} (Initial Advisory)", "inline": True},
             {"name": "Workaround", "value": workaround, "inline": True},
-            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n", "inline": False},
+            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n\n", "inline": False},
             {"name": "Impacted Products", "value": product_lines or "N/A", "inline": False}
         ]
     }

@@ -25,16 +25,15 @@ def get_advisories():
     try:
         result = r.json()
         print("🔍 JSON recebido:", json.dumps(result, indent=2))
-        return result.get("data", [])
+        return result.get("data", {}).get("list", [])
     except Exception as e:
         print("❌ Erro ao interpretar JSON:", e)
         return []
 
 def send_to_discord(advisory):
     title = advisory.get("title", "Sem título")
-    date = advisory.get("publishedDate", "Data desconhecida")
-    advisory_id = advisory.get("advisoryId", "sem-id")
-    link = "https://support.broadcom.com/web/ecx/security-advisory/-/securityadvisory/detail/" + advisory_id
+    date = advisory.get("published", "Data desconhecida")
+    link = advisory.get("notificationUrl") or "https://support.broadcom.com"
     msg = f"⚠️  **Novo VMware Advisory:**\n**{title}**\n📅 {date}\n🔗 {link}"
 
     if SIMULATION_MODE or not WEBHOOK_URL:
@@ -49,8 +48,8 @@ def main():
     new_cache = cache.copy()
 
     for advisory in advisories:
-        if isinstance(advisory, dict) and "advisoryId" in advisory:
-            aid = advisory["advisoryId"]
+        if isinstance(advisory, dict) and "documentId" in advisory:
+            aid = advisory["documentId"]
             if aid not in cache:
                 send_to_discord(advisory)
             new_cache.add(aid)

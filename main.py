@@ -64,12 +64,10 @@ def send_to_discord(advisory):
     cvss_range = advisory.get("cvssRange", "N/A")
     updated_on = advisory.get("updated", "")[:10]
 
-    product_lines = [f"{p.strip()}" for p in products.split(",") if p.strip()]
-
     embed = {
         "title": f"{title_id}",
         "url": link,
-        "description": f"{title_full}\n\n\n",
+        "description": f"{title_full}\n\n",
         "color": COLOR_CODES.get(severity, 0x808080),
         "fields": [
             {"name": "Advisory ID", "value": title_id, "inline": True},
@@ -78,21 +76,15 @@ def send_to_discord(advisory):
             {"name": "Issue date", "value": formatted_date, "inline": True},
             {"name": "Updated on", "value": f"{updated_on} (Initial Advisory)", "inline": True},
             {"name": "Workaround", "value": workaround, "inline": True},
-            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n", "inline": False}
+            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n", "inline": False},
         ]
     }
 
-    # Dividir produtos dinamicamente em múltiplos campos para evitar corte
-    max_len = 900
-    current_chunk = ""
-    for p in product_lines:
-        if len(current_chunk) + len(p) + 1 < max_len:
-            current_chunk += f"{p}\n"
-        else:
-            embed["fields"].append({"name": "Impacted Products", "value": current_chunk.strip(), "inline": False})
-            current_chunk = f"{p}\n"
-    if current_chunk:
-        embed["fields"].append({"name": "Impacted Products", "value": current_chunk.strip(), "inline": False})
+    product_lines = [p.strip() for p in products.split(",") if p.strip()]
+    chunk_size = 5  # Máximo de produtos por campo
+    for i in range(0, len(product_lines), chunk_size):
+        chunk = "\n".join(product_lines[i:i+chunk_size])
+        embed["fields"].append({"name": "Impacted Products", "value": chunk, "inline": False})
 
     payload = {"embeds": [embed]}
 

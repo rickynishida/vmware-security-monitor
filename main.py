@@ -18,7 +18,8 @@ ALLOWED_PRODUCTS = {
     "VMware Aria Operations for logs", "VMware Aria Operations for Networks",
     "VMware Workspace ONE Access (Access)", "VMware Identity Manager (vIDM)"
 }
-ALLOWED_YEARS = {"2025"}
+# ALLOWED_YEARS = {"2025"}  # Comentado conforme solicitado
+DAYS_BACK = 10  # Filtro por data: últimos 10 dias
 
 COLOR_CODES = {
     "CRITICAL": 0xFF0000,
@@ -67,7 +68,7 @@ def send_to_discord(advisory):
     embed = {
         "title": f"{title_id}",
         "url": link,
-        "description": f"{title_full}",
+        "description": f"{title_full}\n\n",  # Salta uma linha antes dos campos
         "color": COLOR_CODES.get(severity, 0x808080),
         "fields": [
             {"name": "Advisory ID", "value": title_id, "inline": True},
@@ -102,7 +103,7 @@ def matches_filters(advisory):
 
     try:
         pub_date = datetime.strptime(published, "%d %B %Y")
-        if str(pub_date.year) not in ALLOWED_YEARS:
+        if pub_date < datetime.now() - timedelta(days=DAYS_BACK):
             return False
     except:
         return False

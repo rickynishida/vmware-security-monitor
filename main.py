@@ -2,7 +2,8 @@ import requests
 import json
 import os
 
-WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
+WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", None)
+SIMULATION_MODE = os.environ.get("SIMULATE", "true").lower() == "true"
 CACHE_FILE = "advisory_cache.json"
 API_URL = "https://support.broadcom.com/web/ecx/security-advisory/-/securityadvisory/getSecurityAdvisoryList"
 
@@ -34,8 +35,12 @@ def send_to_discord(advisory):
     date = advisory.get("publishedDate", "Data desconhecida")
     advisory_id = advisory.get("advisoryId", "sem-id")
     link = "https://support.broadcom.com/web/ecx/security-advisory/-/securityadvisory/detail/" + advisory_id
-    msg = {"content": f"⚠️  **Novo VMware Advisory:**\n**{title}**\n📅 {date}\n🔗 {link}"}
-    requests.post(WEBHOOK_URL, json=msg)
+    msg = f"⚠️  **Novo VMware Advisory:**\n**{title}**\n📅 {date}\n🔗 {link}"
+
+    if SIMULATION_MODE or not WEBHOOK_URL:
+        print("[SIMULAÇÃO] Mensagem para o Discord:\n", msg)
+    else:
+        requests.post(WEBHOOK_URL, json={"content": msg})
 
 def main():
     cache = load_cache()

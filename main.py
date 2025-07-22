@@ -18,7 +18,6 @@ ALLOWED_PRODUCTS = {
     "VMware Aria Operations for logs", "VMware Aria Operations for Networks",
     "VMware Workspace ONE Access (Access)", "VMware Identity Manager (vIDM)"
 }
-# ALLOWED_YEARS = {"2025"}  # Comentado conforme solicitado
 DAYS_BACK = 10  # Filtro por data: últimos 10 dias
 
 COLOR_CODES = {
@@ -64,7 +63,9 @@ def send_to_discord(advisory):
     cvss_range = advisory.get("cvssRange", "N/A")
     updated_on = advisory.get("updated", "")[:10]
 
-    embed = {
+    product_lines = [p.strip() for p in products.split(",") if p.strip()]
+
+    embed_main = {
         "title": f"{title_id}",
         "url": link,
         "description": f"{title_full}\n\n",
@@ -76,17 +77,22 @@ def send_to_discord(advisory):
             {"name": "Issue date", "value": formatted_date, "inline": True},
             {"name": "Updated on", "value": f"{updated_on} (Initial Advisory)", "inline": True},
             {"name": "Workaround", "value": workaround, "inline": True},
-            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n", "inline": False},
+            {"name": "\u200b", "value": f"**CVE(s):** {cves or 'N/A'}\n", "inline": False}
         ]
     }
 
-    product_lines = [p.strip() for p in products.split(",") if p.strip()]
-    chunk_size = 5  # Máximo de produtos por campo
-    for i in range(0, len(product_lines), chunk_size):
-        chunk = "\n".join(product_lines[i:i+chunk_size])
-        embed["fields"].append({"name": "Impacted Products", "value": chunk, "inline": False})
+    embeds = [embed_main]
 
-    payload = {"embeds": [embed]}
+    for i in range(0, len(product_lines), 5):
+        chunk = product_lines[i:i + 5]
+        embed = {
+            "title": "Impacted Products" if i == 0 else "\u200b",
+            "description": "\n".join(chunk),
+            "color": COLOR_CODES.get(severity, 0x808080)
+        }
+        embeds.append(embed)
+
+    payload = {"embeds": embeds}
 
     if SIMULATION_MODE or not WEBHOOK_URL:
         print("[SIMULAÇÃO] Payload para Discord:", json.dumps(payload, indent=2))

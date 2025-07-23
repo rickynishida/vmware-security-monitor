@@ -23,7 +23,7 @@ O portal oficial da Broadcom que publica os **VMware Security Advisories (VMSA)*
 
 Além disso, a consulta exige filtragem manual para:
 
-- Severidade (CRITICAL, HIGH, etc)
+- Severidade (CRITICAL, HIGH, MEDIUM e LOW)
 - Produtos específicos
 - Datas recentes
 

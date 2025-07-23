@@ -40,7 +40,7 @@ Foi desenvolvido um **script Python** automatizado com as seguintes funcionalida
 - Mensagem no Discord com:
   - Título (ID do advisory com link)
   - Descrição
-  - Informações técnicas (Severidade, Synopsis, CVE, data, workaround, CVSS Range)
+  - Informações técnicas (severity, synopsis, CVE, data, workaround, CVSS Range)
   - Lista de produtos impactados
 
 O script está preparado para rodar periodicamente via **GitHub Actions**, com dois agendamentos diários (início e fim do expediente), sem necessidade de infraestrutura própria.

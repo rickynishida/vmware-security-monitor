@@ -157,7 +157,7 @@ def main():
             if aid not in cache and matches_filters(advisory):
                 send_to_discord(advisory)  # Envia para o Discord
             #se falahar comentar essa linha abaido do sent = true
-            sent = True  # Ao menos um advisory foi enviado
+            # sent = True  # Ao menos um advisory foi enviado
             new_cache.add(aid)  # Adiciona ao cache (mesmo se não enviar, garante que não será reprocessado)
         else:
             print("⚠️ Advisory inválido ou inesperado:", advisory)

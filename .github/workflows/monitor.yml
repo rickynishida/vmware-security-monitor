@@ -2,7 +2,10 @@ name: VMware Security Advisory Monitor
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Executa a cada 30 minutos
+  #  - cron: '*/30 * * * *' # Executa a cada 30 minutos
+     - cron: "0 15 * * *"  # 12:00 BRT
+     - cron: "0 21 * * *"  # 18:00 BRT
+
   workflow_dispatch:
 
 jobs:

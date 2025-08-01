@@ -147,9 +147,9 @@ def main():
     new_cache = cache.copy()
 
     # Testes para corrigir o problema do cache local.
-    """
+ """
     sent = False  # Flag para verificar se algum advisory foi enviado
-    """
+ """
 
     for advisory in advisories:
         if isinstance(advisory, dict) and "documentId" in advisory:
@@ -165,7 +165,7 @@ def main():
     save_cache(new_cache) # Salva cache atualizado
 
   # Testes para corrigir o problema do cache local.
-  """
+ """
   # Se nenhum advisory foi enviado, envia uma mensagem informativa
     if not sent:
         send_no_update_message()
@@ -196,7 +196,7 @@ def send_no_update_message():
         elif response.status_code == 204:
             print("✅ Mensagem padrão enviada com sucesso para o Discord.")
 
-  """
+ """
 
 # Executa se o script for chamado diretamente
 if __name__ == "__main__":

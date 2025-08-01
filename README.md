@@ -115,6 +115,8 @@ vmware-security-monitor/
 - Título com o ID do Advisory (ex: VMSA-2025-0012)
 - Descrição com título completo do advisory
 - Campos: CVSS, Severidade, CVEs, Workaround, Data de publicação, Produtos impactados
+  
+![Texto alternativo](assets/images/payload.png)
 
 ---
 

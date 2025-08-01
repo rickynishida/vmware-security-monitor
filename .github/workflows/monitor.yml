@@ -28,4 +28,3 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           SIMULATE: "false"
         run: python main.py
-

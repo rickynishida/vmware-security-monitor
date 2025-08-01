@@ -18,7 +18,7 @@ ALLOWED_PRODUCTS = {
     "VMware Aria Operations for logs", "VMware Aria Operations for Networks",
     "VMware Workspace ONE Access (Access)", "VMware Identity Manager (vIDM)"
 }
-# ALLOWED_YEARS = {"2025"}  # Filtragem por ano
+# ALLOWED_YEARS = {"2025"}  # Filtragem por ano 
 DAYS_BACK = 10  # Filtro por data: últimos 10 dias
 
 COLOR_CODES = {

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta  # Para lidar com datas e horários
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", None)
 
 # Modo de simulação: se for True, apenas imprime no terminal sem enviar ao Discord
-SIMULATION_MODE = os.environ.get("SIMULATE", "true").lower() == "true"
+SIMULATION_MODE = os.environ.get("SIMULATE", "true").lower() != "false"
 
 # Nome do arquivo de cache que armazena advisories já enviados
 CACHE_FILE = "advisory_cache.json"

@@ -22,10 +22,14 @@ Essa automação foi criada com foco em:
 O portal oficial da Broadcom que publica os **VMware Security Advisories (VMSA)** não oferece nativamente suporte a **webhooks**, **RSS** ou **integrações automáticas** com ferramentas como Discord, Slack, Zabbix, etc. Isso dificulta o monitoramento contínuo de novos avisos de segurança.
 
 Além disso, a consulta exige filtragem manual para:
-
-- Severidade (CRITICAL, HIGH, MEDIUM e LOW)
-- Produtos específicos
-- Datas recentes
+- Filtros aplicados por:
+  - Severidade (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`)
+  - Produtos impactados (lista personalizada)
+  - Datas (últimos X dias)
+- Cache local para evitar reenvio de advisories já notificados
+- Envio formatado com embeds para o Discord
+- Execução automática via **GitHub Actions**
+- Persistência segura utilizando **GitHub Actions Cache (v4)**
 
 ---
 
@@ -34,14 +38,17 @@ Além disso, a consulta exige filtragem manual para:
 Foi desenvolvido um **script Python** automatizado com as seguintes funcionalidades:
 
 - Acesso via API JSON ao portal Broadcom (método `POST`)
-- Filtragem por severidade, produtos e data (últimos 10 dias)
-- Verificação de duplicidade (cache local em JSON)
-- Envio automático e formatado para um **webhook do Discord**
+- Filtragem por severidade, produtos VMware utilizados na organização e data (últimos 10 dias)
+- Suporte a modo de simulação (sem envio real)
+- Evita alertas duplicados com cache local persistente
+- Envio automático e formatado para um canal **webhook do Discord**
+- Execução agendada com GitHub Actions (cron job) 
 - Mensagem no Discord com:
   - Título (ID do advisory com link)
   - Descrição
   - Informações técnicas (severity, synopsis, CVE, data, workaround, CVSS Range)
   - Lista de produtos impactados
+- Suporte à nova versão `actions/upload-artifact@v4`
 
 O script está preparado para rodar periodicamente via **GitHub Actions**, com dois agendamentos diários (início e fim do expediente), sem necessidade de infraestrutura própria.
 
@@ -49,13 +56,17 @@ O script está preparado para rodar periodicamente via **GitHub Actions**, com d
 
 ## 🛠️ Tecnologias Utilizadas
 
-- [Python 3.x](https://www.python.org/)
+- [Python 3.9+](https://www.python.org/)
 - `requests` (HTTP client)
 - `json` (manipulação dos dados)
 - `os` e `datetime` (manipulação de ambiente e datas)
 - [GitHub Actions](https://github.com/features/actions) (agendamento gratuito)
 - [Discord Webhooks](https://discord.com/developers/docs/resources/webhook) (para envio de notificações)
 
+Instalação local:
+```bash
+pip install -r requirements.txt
+```
 ---
 
 ## ⚙️ Como funciona
@@ -93,9 +104,33 @@ python main.py
 vmware-security-monitor/
 ├── main.py               # Código principal
 ├── advisory_cache.json   # Cache local de advisories enviados
+├── requirements.txt       # Dependências do projeto
 ├── .github/workflows/
 │   └── monitor.yml        # Agendamento via GitHub Actions
 ├── README.md             # Este arquivo
 ```
+---
+
+## 🔐 Segurança
+
+- Utiliza cache persistente via **GitHub Actions Cache (v4)** para manter histórico seguro dos advisories processados
+
+---
+
+## 🛠️ Contribuições
+
+Pull Requests são bem-vindos. Sugestões de novos filtros ou melhorias na formatação do Discord são incentivadas.
+
+---
+
+## 👨‍💻 Autor
+
+Desenvolvido por Ricardo Marques — especialista em infraestrutura VMware, segurança e automações com IA.
+
+---
+
+## 📜 Licença
+
+Este projeto é open-source e distribuído sob a [MIT License](LICENSE).
 
 

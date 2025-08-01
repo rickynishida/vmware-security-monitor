@@ -186,4 +186,5 @@ def send_no_update_message():
 
 # Executa se o script for chamado diretamente
 if __name__ == "__main__":
-    main()
+    # main()
+    send_no_update_message()

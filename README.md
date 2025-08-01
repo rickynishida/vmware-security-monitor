@@ -136,7 +136,7 @@ Pull Requests são bem-vindos. Sugestões de novos filtros ou melhorias na forma
 
 ## 👨‍💻 Autor
 
-Desenvolvido por Ricardo Marques — especialista em infraestrutura VMware, segurança e automações com IA.
+Desenvolvido por Ricardo Marques — especialista em infraestrutura VMware.
 
 ---
 

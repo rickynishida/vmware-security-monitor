@@ -1,15 +1,25 @@
-import requests
-import json
-import os
-from datetime import datetime, timedelta
+# Importa bibliotecas necessárias
+import requests  # Para requisições HTTP
+import json      # Para manipulação de dados JSON
+import os        # Para acessar variáveis de ambiente e arquivos locais
+from datetime import datetime, timedelta  # Para lidar com datas e horários
 
+# Busca a URL do webhook do Discord da variável de ambiente
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", None)
+
+# Modo de simulação: se for True, apenas imprime no terminal sem enviar ao Discord
 SIMULATION_MODE = os.environ.get("SIMULATE", "true").lower() == "true"
+
+# Nome do arquivo de cache que armazena advisories já enviados
 CACHE_FILE = "advisory_cache.json"
+
+# URL da API da Broadcom para consultar os advisories de segurança da VMware
 API_URL = "https://support.broadcom.com/web/ecx/security-advisory/-/securityadvisory/getSecurityAdvisoryList"
 
-# Filtros personalizáveis
+# Filtros de severidade permitida
 ALLOWED_SEVERITIES = {"CRITICAL", "HIGH", "MEDIUM", "LOW"}
+
+# Lista de produtos relevantes para monitoramento
 ALLOWED_PRODUCTS = {
     "VMware Cloud Foundation", "VMware vCenter Server", "VMware ESXi",
     "VMware Tools", "VMware vSphere", "VMware Data Services Manager",
@@ -18,26 +28,32 @@ ALLOWED_PRODUCTS = {
     "VMware Aria Operations for logs", "VMware Aria Operations for Networks",
     "VMware Workspace ONE Access (Access)", "VMware Identity Manager (vIDM)"
 }
-# ALLOWED_YEARS = {"2025"}  # Filtragem por ano 
-DAYS_BACK = 10  # Filtro por data: últimos 10 dias
 
+# Quantidade de dias para filtrar advisories recentes
+# ALLOWED_YEARS = {"2025"}  # Filtragem por ano 
+DAYS_BACK = 10
+
+# Dicionário com códigos de cores baseados na severidade
 COLOR_CODES = {
-    "CRITICAL": 0xFF0000,
-    "HIGH": 0xFF8000,
-    "MEDIUM": 0xFEFF00,
-    "LOW": 0x00FF00
+    "CRITICAL": 0xFF0000,    # Vermelho
+    "HIGH": 0xFF8000,        # Laranja
+    "MEDIUM": 0xFEFF00,      # Amarelo
+    "LOW": 0x00FF00          # Verde
 }
 
+# Função para carregar o cache de advisories já enviados
 def load_cache():
     if os.path.exists(CACHE_FILE):
         with open(CACHE_FILE, "r") as f:
-            return set(json.load(f))
+            return set(json.load(f))  # Converte a lista salva em um set para busca rápida
     return set()
 
+# Função para salvar o cache atualizado
 def save_cache(cache):
     with open(CACHE_FILE, "w") as f:
-        json.dump(list(cache), f)
+        json.dump(list(cache), f)  # Converte o set de volta para lista antes de salvar
 
+# Função que consulta a API da Broadcom para buscar os advisories
 def get_advisories():
     payload = {"pageNumber": 0, "pageSize": 10, "searchVal": "", "segment": "VC"}
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
@@ -45,11 +61,12 @@ def get_advisories():
 
     try:
         result = r.json()
-        return result.get("data", {}).get("list", [])
+        return result.get("data", {}).get("list", [])  # Lista de advisories
     except Exception as e:
         print("❌ Erro ao interpretar JSON:", e)
         return []
 
+# Função que envia a mensagem formatada para o Discord via Webhook
 def send_to_discord(advisory):
     title_full = advisory.get("title", "Sem título")
     advisory_id = advisory.get("documentId", "")
@@ -64,13 +81,15 @@ def send_to_discord(advisory):
     cvss_range = advisory.get("cvssRange", "N/A")
     updated_on = advisory.get("updated", "")[:10]
 
+    # Concatena os produtos impactados em uma linha separados por vírgula
     product_line = ", ".join([p.strip() for p in products.split(",") if p.strip()])
 
+    # Estrutura do embed (mensagem enriquecida) para o Discord
     embed = {
-        "title": f"{title_id}",
+        "title": f"{title_id}",  # Ex: VMSA-2025-0013
         "url": link,
-        "description": f"{title_full}\n\n\n",
-        "color": COLOR_CODES.get(severity, 0x808080),
+        "description": f"{title_full}\n\n\n",  # Título completo com descrição
+        "color": COLOR_CODES.get(severity, 0x808080),  # Cor da borda do embed
         "fields": [
             {"name": "Advisory ID", "value": title_id, "inline": True},
             {"name": "Advisory Severity", "value": severity, "inline": True},
@@ -92,17 +111,21 @@ def send_to_discord(advisory):
         if response.status_code != 204:
             print(f"❌ Erro ao enviar para Discord: {response.status_code} - {response.text}")
 
+# Verifica se o advisory atende aos filtros definidos
 def matches_filters(advisory):
     severity = advisory.get("severity", "").upper()
     products = advisory.get("supportProducts", "")
     published = advisory.get("published", "")
 
+    # Filtro por severidade
     if severity not in ALLOWED_SEVERITIES:
         return False
 
+    # Filtro por produto relevante
     if not any(prod.lower() in products.lower() for prod in ALLOWED_PRODUCTS):
         return False
 
+    # Filtro por data de publicação (últimos N dias)
     try:
         pub_date = datetime.strptime(published, "%d %B %Y")
         if pub_date < datetime.now() - timedelta(days=DAYS_BACK):
@@ -112,9 +135,10 @@ def matches_filters(advisory):
 
     return True
 
+# Função principal
 def main():
-    cache = load_cache()
-    advisories = get_advisories()
+    cache = load_cache()  # Carrega cache dos advisories já enviados
+    advisories = get_advisories()  # Consulta a API
 
     new_cache = cache.copy()
 
@@ -122,12 +146,13 @@ def main():
         if isinstance(advisory, dict) and "documentId" in advisory:
             aid = advisory["documentId"]
             if aid not in cache and matches_filters(advisory):
-                send_to_discord(advisory)
-            new_cache.add(aid)
+                send_to_discord(advisory)  # Envia para o Discord
+            new_cache.add(aid)  # Adiciona ao cache (mesmo se não enviar, garante que não será reprocessado)
         else:
             print("⚠️ Advisory inválido ou inesperado:", advisory)
 
-    save_cache(new_cache)
+    save_cache(new_cache)  # Salva cache atualizado
 
+# Executa se o script for chamado diretamente
 if __name__ == "__main__":
     main()

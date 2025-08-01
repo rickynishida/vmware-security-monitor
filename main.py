@@ -139,19 +139,47 @@ def matches_filters(advisory):
 def main():
     cache = load_cache()  # Carrega cache dos advisories já enviados
     advisories = get_advisories()  # Consulta a API
-
     new_cache = cache.copy()
-
+    
+    sent = False  # Flag para verificar se algum advisory foi enviado
+    
     for advisory in advisories:
         if isinstance(advisory, dict) and "documentId" in advisory:
             aid = advisory["documentId"]
             if aid not in cache and matches_filters(advisory):
                 send_to_discord(advisory)  # Envia para o Discord
+                sent = True  # Ao menos um advisory foi enviado
             new_cache.add(aid)  # Adiciona ao cache (mesmo se não enviar, garante que não será reprocessado)
         else:
             print("⚠️ Advisory inválido ou inesperado:", advisory)
 
     save_cache(new_cache)  # Salva cache atualizado
+
+    # Se nenhum advisory foi enviado, envia uma mensagem informativa
+    if not sent:
+        send_no_update_message()
+
+# Função que envia uma mensagem ao Discord informando que não há novos advisories
+def send_no_update_message():
+    # Define a estrutura da mensagem embed com título, descrição e cor verde
+    embed = {
+        "title": "Nenhum novo Security Advisory",  # Título da mensagem
+        "description": "✅ No momento, não há novos alertas de segurança VMware Broadcom.",  # Texto informativo
+        "color": 0x00FF00  # Cor verde indicando status normal/sem alertas
+    }
+
+    # Prepara o payload com o embed para envio
+    payload = {"embeds": [embed]}
+
+    # Se estiver em modo simulado ou a URL do webhook não estiver definida, imprime o conteúdo no terminal
+    if SIMULATION_MODE or not WEBHOOK_URL:
+        print("[SIMULAÇÃO] Mensagem sem novos advisories:", json.dumps(payload, indent=2))
+    else:
+        # Envia o payload para o Discord
+        response = requests.post(WEBHOOK_URL, json=payload)
+        # Verifica se a resposta foi bem-sucedida
+        if response.status_code != 204:
+            print(f"❌ Erro ao enviar mensagem padrão: {response.status_code} - {response.text}")
 
 # Executa se o script for chamado diretamente
 if __name__ == "__main__":

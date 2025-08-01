@@ -116,7 +116,7 @@ vmware-security-monitor/
 - Descrição com título completo do advisory
 - Campos: CVSS, Severidade, CVEs, Workaround, Data de publicação, Produtos impactados
   
-<p align="right">
+<p align="left">
   <img src="assets/images/payload.png" alt="Exemplo Payload no Discord" width="600"/>
 </p>
 

@@ -109,6 +109,13 @@ vmware-security-monitor/
 │   └── monitor.yml        # Agendamento via GitHub Actions
 ├── README.md             # Este arquivo
 ```
+
+## ✅ Exemplo de payload enviado para Discord
+
+- Título com o ID do Advisory (ex: VMSA-2025-0012)
+- Descrição com título completo do advisory
+- Campos: CVSS, Severidade, CVEs, Workaround, Data de publicação, Produtos impactados
+
 ---
 
 ## 🔐 Segurança

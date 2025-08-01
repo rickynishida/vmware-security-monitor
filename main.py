@@ -7,7 +7,7 @@ from datetime import datetime, timedelta  # Para lidar com datas e horários
 # Busca a URL do webhook do Discord da variável de ambiente
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", None)
 # Modo de simulação: se for True, apenas imprime no terminal sem enviar ao Discord
-SIMULATION_MODE = os.environ.get("SIMULATE", "true").lower() == "true"
+SIMULATION_MODE = os.environ.get("SIMULATE", "true").lower() != "false"
 # Nome do arquivo de cache que armazena advisories já enviados
 CACHE_FILE = "advisory_cache.json"
 # URL da API da Broadcom para consultar os advisories de segurança da VMware
@@ -157,7 +157,7 @@ def main():
             if aid not in cache and matches_filters(advisory):
                 send_to_discord(advisory)  # Envia para o Discord
             #se falahar comentar essa linha abaido do sent = true
-            # sent = True  # Ao menos um advisory foi enviado
+            sent = True  # Ao menos um advisory foi enviado
             new_cache.add(aid)  # Adiciona ao cache (mesmo se não enviar, garante que não será reprocessado)
         else:
             print("⚠️ Advisory inválido ou inesperado:", advisory)

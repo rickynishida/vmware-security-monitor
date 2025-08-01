@@ -6,27 +6,24 @@ on:
      - cron: "0 15 * * *"  # 12:00 BRT
      - cron: "0 21 * * *"  # 18:00 BRT
 
-  workflow_dispatch:
+  workflow_dispatch: # permite executar manualmente também
 
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    env:
-      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-      SIMULATE: "false"
-      
+          
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Restore advisory cache
-        id: cache-advisory
-        uses: actions/cache@v3
-        with:
-          path: advisory_cache.json
-          key: advisory-cache-${{ github.run_id }}
-          restore-keys: |
-            advisory-cache-
+#      - name: Restore advisory cache
+#        id: cache-advisory
+#        uses: actions/cache@v3
+#        with:
+#          path: advisory_cache.json
+#          key: advisory-cache-${{ github.run_id }}
+#          restore-keys: |
+#            advisory-cache-
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -39,16 +36,20 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run monitoring script
+ 
+
+#      - name: Save advisory cache
+#        if: success()
+#        run: |
+#          mkdir -p cache && cp advisory_cache.json cache/
+
+#      - name: Upload latest advisory cache artifact
+#        if: success()
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: advisory-cache-latest
+#          path: cache/advisory_cache.json
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          SIMULATE: "false"
         run: python main.py
-
-      - name: Save advisory cache
-        if: success()
-        run: |
-          mkdir -p cache && cp advisory_cache.json cache/
-
-      - name: Upload latest advisory cache artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: advisory-cache-latest
-          path: cache/advisory_cache.json

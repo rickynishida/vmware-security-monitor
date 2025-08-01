@@ -181,6 +181,9 @@ def send_no_update_message():
         if response.status_code != 204:
             print(f"❌ Erro ao enviar mensagem padrão: {response.status_code} - {response.text}")
 
+        elif response.status_code == 204:
+            print("✅ Mensagem padrão enviada com sucesso para o Discord.")
+
 # Executa se o script for chamado diretamente
 if __name__ == "__main__":
     main()
